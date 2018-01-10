@@ -22,8 +22,9 @@ Vector2f ballVelocity;
 bool server = false;
 
 Font font;
-Text text;
+Text scoreText;
 int score = 0;
+bool two_player = false;
 
 void reset() {
 	// reset paddle position
@@ -33,9 +34,8 @@ void reset() {
 	ball.setPosition(gameWidth / 2, gameHeight / 2);
 	ballVelocity = { server ? 100.0f : -100.0f, 60.0f };
 	// Update score text
-	text.setString(to_string(score));
-	text.setColor(Color::White);
-	text.setPosition((gameWidth * 0.5f) - (text.getLocalBounds().width * 0.5f), 0);
+	scoreText.setString(to_string(score));
+	scoreText.setPosition((gameWidth * 0.5f) - (scoreText.getLocalBounds().width * 0.5f), 0);
 }
 
 void Load() {
@@ -47,13 +47,13 @@ void Load() {
 	// Set size and origin of ball
 	ball.setRadius(ballRadius - 3);
 	ball.setOrigin(ballRadius / 2, ballRadius / 2);
-	reset();
 	// Load font-face from res dir
 	font.loadFromFile("res/fonts/RobotoMono-Regular.ttf");
 	// Set text element to use font
-	text.setFont(font);
+	scoreText.setFont(font);
 	// set the character size to 24 pixels  
-	text.setCharacterSize(24);
+	scoreText.setCharacterSize(24);
+	reset();
 }
 
 void Update(RenderWindow &window) {
@@ -84,41 +84,38 @@ void Update(RenderWindow &window) {
 	}
 	paddles[0].move(0, direction * paddleSpeed * dt);
 	if (paddles[0].getPosition().y - paddleSize.y / 2 < 0) {
-		paddles[0].move(0, 10);
+		paddles[0].move(0, 2);
 	}
 	else if (paddles[0].getPosition().y + paddleSize.y / 2> gameHeight) {
-		paddles[0].move(0, -10);
+		paddles[0].move(0, -2);
 	}
 	
 	direction = 0.0f;
 	if (Keyboard::isKeyPressed(controls[2])) {
+		two_player = true;
 		direction--;
 	}
 	if (Keyboard::isKeyPressed(controls[3])) {
+		two_player = true;
 		direction++;
 	}
 	paddles[1].move(0, direction * paddleSpeed * dt);
-	if (paddles[1].getPosition().y - paddleSize.y / 2 < 0) {
-		paddles[1].move(0, 10);
-	}
-	else if (paddles[1].getPosition().y + paddleSize.y / 2> gameHeight) {
-		paddles[1].move(0, -10);
-	}
 
-	if (paddles[1].getPosition().y < ball.getPosition().y) {
-		direction++;
+	if (!two_player) {
+		if (paddles[1].getPosition().y < ball.getPosition().y) {
+			direction++;
+		}
+		else if (paddles[1].getPosition().y > ball.getPosition().y) {
+			direction--;
+		}
+		paddles[1].move(0, direction * paddleSpeed * dt);
+		if (paddles[1].getPosition().y - paddleSize.y / 2 < 0) {
+			paddles[1].move(0, 2);
+		}
+		else if (paddles[1].getPosition().y + paddleSize.y / 2 > gameHeight) {
+			paddles[1].move(0, -2);
+		}
 	}
-	else if (paddles[1].getPosition().y > ball.getPosition().y) {
-		direction--;
-	}
-	paddles[1].move(0, direction * paddleSpeed * dt);
-	if (paddles[1].getPosition().y - paddleSize.y / 2 < 0) {
-		paddles[1].move(0, 10);
-	}
-	else if (paddles[1].getPosition().y + paddleSize.y / 2> gameHeight) {
-		paddles[1].move(0, -10);
-	}
-
 	ball.move(ballVelocity * dt);
 
 	// check ball collision
@@ -148,7 +145,7 @@ void Update(RenderWindow &window) {
 	}
 	else if (
 		// ball is inline or behind paddle
-		bx < paddleSize.x &&
+		bx < paddleSize.x + 10 &&
 		// AND ball is below top edge of paddle
 		by > paddles[0].getPosition().y - (paddleSize.y * 0.5) &&
 		// AND ball is above bottom edge of paddle
@@ -161,7 +158,7 @@ void Update(RenderWindow &window) {
 	}
 	else if (
 		// ball is inline or behind paddle
-		bx > gameWidth - paddleSize.x &&
+		bx > gameWidth - paddleSize.x - 10 &&
 		// AND ball is below top edge of paddle
 		by > paddles[1].getPosition().y - (paddleSize.y * 0.5) &&
 		// AND ball is above bottom edge of paddle
@@ -179,7 +176,7 @@ void Render(RenderWindow &window) {
 	window.draw(paddles[0]);
 	window.draw(paddles[1]);
 	window.draw(ball);
-	window.draw(text);
+	window.draw(scoreText);
 }
 
 int main(){
