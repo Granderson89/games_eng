@@ -1,18 +1,21 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "game.h"
 
 class Ship : public sf::Sprite {
 protected:
 	sf::IntRect _sprite;
+	bool _exploded;
+	// Default constructor is hidden
 	Ship();
 public:
-
+	// Constructor that takes a sprite
 	explicit Ship(sf::IntRect ir);
-
+	// Pure virtual deconstructor -- makes this an abstract class
 	virtual ~Ship() = 0;
-
+	// Update, virtual so can be overriden, but not pure virtual
 	virtual void Update(const float &dt);
+	bool is_exploded() const;
+	virtual void Explode();
 };
 
 class Invader : public Ship {

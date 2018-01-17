@@ -1,5 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "ship.h"
+#include "game.h"
+#include "bullet.h"
 #include <iostream>
  
 using namespace sf;
@@ -9,21 +11,22 @@ Texture spritesheet;
 Sprite invader;
 
 std::vector<Ship*> ships;
+Ship* player;
 
 void Load() {
-	if (!spritesheet.loadFromFile("res/img/invaders_sheet.png")) {
+	if (!spritesheet.loadFromFile("C:/Users/40218994/Desktop/games_eng_build/bin/Debug/res/img/invaders_sheet.png")) {
 		cerr << "Failed to load spritesheet!" << endl;
 	}
 
 	for (int r = 0; r < invaders_rows; ++r) {
-		auto rect = IntRect(32 * r, 32 * r, 32, 32);
+		auto rect = IntRect(32 * r, 0, 32, 32);
 		for (int c = 0; c < invaders_columns; ++c) {
-			Vector2f position(32.0f * r, 32.0f * c);
+			Vector2f position(32.0f * c + gameWidth / 4, 32.0f * r + gameHeight / 8);
 			auto inv = new Invader(rect, position);
 			ships.push_back(inv);
 		}
 	}
-	auto player = new Player();
+	player = new Player();
 	ships.push_back(player);
 }
 
