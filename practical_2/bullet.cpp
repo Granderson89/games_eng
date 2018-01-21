@@ -3,28 +3,32 @@
 using namespace sf;
 using namespace std;
 
+Bullet Bullet::bullets[256];
+unsigned char Bullet::bulletPointer = 0;
+
 Bullet::Bullet() {};
 
-Bullet::Bullet(const sf::Vector2f &pos, const bool mode) {
-	_mode = mode;
-	setPosition(pos);
-}
-
 void Bullet::Update(const float &dt) {
-	for each (Bullet b in bullets) {
+	for (auto &b : bullets) {
 		b._Update(dt);
 	}
 }
 
 void Bullet::Render(sf::RenderWindow &window) {
-	for each (Bullet b in bullets) {
-		b.Render(window);
+	for (int i = 0; i < 256; i++) {
+		window.draw(bullets[i]);
 	}
 }
 
 void Bullet::Fire(const sf::Vector2f &pos, const bool mode) {
 	bullets[++bulletPointer].setPosition(pos);
 	bullets[bulletPointer]._mode = mode;
+	bullets[bulletPointer].setTexture(spritesheet);
+	if (mode == true)
+		bullets[bulletPointer].setTextureRect(IntRect(32, 32, 32, 32));
+	else
+		bullets[bulletPointer].setTextureRect(IntRect(64, 32, 32, 32));
+
 }
 
 void Bullet::_Update(const float &dt) {

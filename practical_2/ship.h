@@ -16,6 +16,7 @@ public:
 	virtual void Update(const float &dt);
 	bool is_exploded() const;
 	virtual void Explode();
+	float explosionTimer = 0.0f;
 };
 
 class Invader : public Ship {

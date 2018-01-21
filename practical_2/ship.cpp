@@ -8,9 +8,10 @@ bool Invader::direction = true;
 float Invader::speed = 20.0f;
 const float playerSpeed = 400.f;
 
-const Keyboard::Key controls[2] = {
-	Keyboard::Left,  // Player2 UP
-	Keyboard::Right // Player2 DOWN
+const Keyboard::Key controls[3] = {
+	Keyboard::Left,  // Player1 LEFT
+	Keyboard::Right, // Player1 RIGHT
+	Keyboard::Space
 };
 
 Ship::Ship() {};
@@ -19,9 +20,17 @@ Ship::Ship(IntRect ir) : Sprite() {
 	_sprite = ir;
 	setTexture(spritesheet);
 	setTextureRect(_sprite);
+	_exploded = false;
 };
 
-void Ship::Update(const float &dt) {}
+void Ship::Update(const float &dt) {
+	if (is_exploded()) {
+		explosionTimer -= dt;
+		if (explosionTimer <= -2) {
+			setTextureRect(IntRect(-32, -32, 32, 32));
+		}
+	}
+}
 
 void Ship::Explode() {
 	setTextureRect(IntRect(128, 32, 32, 32));

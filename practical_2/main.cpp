@@ -14,7 +14,7 @@ std::vector<Ship*> ships;
 Ship* player;
 
 void Load() {
-	if (!spritesheet.loadFromFile("C:/Users/40218994/Desktop/games_eng_build/bin/Debug/res/img/invaders_sheet.png")) {
+	if (!spritesheet.loadFromFile("C:/Users/grant/Desktop/games_eng_builds/bin/Debug/res/img/invaders_sheet.png")) {
 		cerr << "Failed to load spritesheet!" << endl;
 	}
 
@@ -51,12 +51,15 @@ void Update(RenderWindow &window) {
 	for (auto &s : ships) {
 		s->Update(dt);
 	}
+
+	Bullet::Update(dt);
 }
 
 void Render(RenderWindow &window) {
 	for (const auto s : ships) {
 		window.draw(*s);
 	}
+	Bullet::Render(window);
 }
 
 int main() {
