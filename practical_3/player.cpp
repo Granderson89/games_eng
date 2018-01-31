@@ -26,11 +26,11 @@ void Player::update(double dt) {
 		direction.y = 1.0f;
 	}
 
-	Entity::move(direction * _speed);
+	Entity::move(direction * _speed * (float) dt);
 	Entity::update(dt);
 }
 
-Player::Player() : _speed(1.0f), Entity(make_unique<CircleShape>(25.0f)) {
+Player::Player() : _speed(200.0f), Entity(make_unique<CircleShape>(25.0f)) {
 	_shape->setFillColor(Color::Magenta);
 	_shape->setOrigin(Vector2f(25.0f, 25.0f));
 }
