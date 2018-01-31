@@ -1,4 +1,6 @@
 #include <SFML/Graphics.hpp>
+#include "entity.h"
+#include "player.h"
 
 using namespace sf;
 using namespace std;
@@ -6,10 +8,10 @@ using namespace std;
 const int gameWidth = 800;
 const int gameHeight = 600;
 
-
+Entity* player;
 
 void Load() {
-	
+	player = new Player();
 }
 
 void Update(RenderWindow &window) {
@@ -30,10 +32,12 @@ void Update(RenderWindow &window) {
 		window.close();
 	}
 
+	player->update(dt);
 }
 
 void Render(RenderWindow &window) {
 	// Draw everything
+	player->render(window);
 
 }
 
