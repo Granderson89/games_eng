@@ -1,12 +1,16 @@
 #include "ship.h"
 #include "game.h"
 #include "bullet.h"
+#include <iostream>
+
 using namespace sf;
 using namespace std;
 
 bool Invader::direction = true;
 float Invader::speed = 20.0f;
 const float playerSpeed = 400.f;
+float Invader::bottom_row = 0.0f;
+int Invader::count = 0;
 
 const Keyboard::Key controls[3] = {
 	Keyboard::Left,  // Player1 LEFT
@@ -56,9 +60,23 @@ void Invader::Update(const float &dt) {
 	Ship::Update(dt);
 
 	move(dt * (direction ? 1.0f : -1.0f) * speed, 0);
+	
+	bottom_row = 0.0f;
+	count = 0;
 
-	if ((direction && getPosition().x > gameWidth - 16) ||
-		(!direction && getPosition().x < 16)) {
+	for (int i = 0; i < ships.size() - 1; ++i) {
+		if (!ships[i]->is_exploded()) {
+			count++;
+			if (ships[i]->getPosition().y > bottom_row) {
+				bottom_row = ships[i]->getPosition().y;
+			}
+		}
+		
+	}
+	std::cout << count << std::endl;
+	if (!is_exploded() &&
+		((direction && getPosition().x > gameWidth - 16) ||
+		(!direction && getPosition().x < 16))) {
 		direction = !direction;
 		for (int i = 0; i < ships.size() - 1; ++i) {
 			ships[i]->move(0, 24);
@@ -67,15 +85,37 @@ void Invader::Update(const float &dt) {
 
 	static float firetime = 0.0f;
 	firetime -= dt;
+	static float firerate = 1.0f;
+	if (count < 50) {
+		firerate = 1.5f;
+		speed = 50.0f;
+	}
+	if (count < 40) {
+		firerate = 2.0f;
+		speed = 100.0f;
+	}
+	if (count < 30) {
+		firerate = 3.0f;
+		speed = 150.0f;
+	}
+	if (count < 15) {
+		firerate = 4.0f;
+		speed = 200.0f;
+	}
+	if (count < 5) {
+		firerate = 5.0f;
+		speed = 300.0f;
+	}
 
-	if (firetime <= 0 && rand() % 100 == 0) {
+	if (firetime <= 0 && rand() % 100 == 0 && getPosition().y == bottom_row && !is_exploded()) {
 		Bullet::Fire(getPosition(), true);
-		firetime = 4.0f + (rand() % 60);
+		firetime = 4.0f * firerate + (rand() % 60);
 	}
 }
 
+
 Player::Player() : Ship(IntRect(160, 32, 32, 32)) {
-	setPosition({ gameHeight * .5f, gameHeight - 32.f });
+	setPosition({ gameWidth * .5f, gameHeight - 32.f });
 }
 
 void Player::Update(const float &dt) {
@@ -101,4 +141,5 @@ void Player::Update(const float &dt) {
 		Bullet::Fire(getPosition(), false);
 		firetime = 0.7f;
 	}
+
 }
