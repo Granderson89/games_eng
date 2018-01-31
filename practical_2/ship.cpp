@@ -1,7 +1,6 @@
 #include "ship.h"
 #include "game.h"
 #include "bullet.h"
-#include <iostream>
 
 using namespace sf;
 using namespace std;
@@ -73,7 +72,6 @@ void Invader::Update(const float &dt) {
 		}
 		
 	}
-	std::cout << count << std::endl;
 	if (!is_exploded() &&
 		((direction && getPosition().x > gameWidth - 16) ||
 		(!direction && getPosition().x < 16))) {
