@@ -23,6 +23,8 @@ class Invader : public Ship {
 public:
 	static bool direction;
 	static float speed;
+	static float bottom_row;
+	static int count;
 
 	Invader(sf::IntRect ir, sf::Vector2f pos);
 	Invader();
