@@ -50,7 +50,7 @@ add_dependencies(PRACTICAL_3 copy_resources_3)
 file(GLOB_RECURSE SOURCES practical_4/*.cpp practical_4/*.h)
 add_executable(PRACTICAL_4 ${SOURCES})
 target_include_directories(PRACTICAL_4 SYSTEM PRIVATE ${SFML_INCS})
-target_link_libraries(PRACTICAL_4 sfml-graphics)
+target_link_libraries(PRACTICAL_4 sfml-graphics lib_ecm lib_tile_level_loader)
 add_custom_target(copy_resources_4 ALL COMMAND ${CMAKE_COMMAND}
 	-E copy_directory
 	"${PROJECT_SOURCE_DIR}/res"
@@ -72,3 +72,9 @@ target_sources(lib_maths INTERFACE
 	"${CMAKE_SOURCE_DIR}/lib_maths/maths.h")
 target_include_directories(lib_maths INTERFACE
 	"${CMAKE_SOURCE_DIR}/lib_maths" SYSTEM INTERFACE ${SFML_INCS})
+
+## ECM lib
+file(GLOB_RECURSE SOURCE_FILES lib_ecm/*.cpp lib_ecm/*.h)
+add_library(lib_ecm STATIC ${SOURCE_FILES})
+target_include_directories(lib_ecm INTERFACE "${CMAKE_SOURCE_DIR}/lib_ecm")
+target_link_libraries(lib_ecm PRIVATE lib_maths)

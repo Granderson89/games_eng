@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
-#include "entity.h"
-#include "player.h"
-#include "ghost.h"
+#include "system_renderer.h"
+#include "ecm.h"
+#include "pacman.h"
 #include <iostream>
 
 using namespace sf;
@@ -10,27 +10,23 @@ using namespace std;
 const int gameWidth = 800;
 const int gameHeight = 600;
 
-EntityManager em;
 
-int number_ghosts = 4;
 
 void Load() {
-	// Create player and add to entities
-	auto player = make_shared<Player>();
-	player->setPosition(Vector2f(100.0f, 100.0f));
-	em.list.push_back(player);
-	
-	// Create ghosts and add to entities
-	for (int i = 0; i < number_ghosts; i++) {
-		auto ghost = make_shared<Ghost>();
-		em.list.push_back(ghost);
-	}
+	// Load Scene-Local Assets
+	gameScene.reset(new GameScene());
+	menuScene.reset(new MenuScene());
+	gameScene->load();
+	menuScene->load();
+	// Start at main menu
+	activeScene = menuScene;
 }
 
 void Update(RenderWindow &window) {
 	// Reset clock, recalculate deltatime
 	static Clock clock;
 	float dt = clock.restart().asSeconds();
+	activeScene->update(dt);
 	// check and consume events
 	Event event;
 	while (window.pollEvent(event)) {
@@ -44,25 +40,27 @@ void Update(RenderWindow &window) {
 	if (Keyboard::isKeyPressed(Keyboard::Escape)) {
 		window.close();
 	}
-
-	// Update all entities
-	em.update(dt);
 }
 
 void Render(RenderWindow &window) {
-	// Draw all entities
-	em.render(window);
+	activeScene->render();
+	// flush to screen
+	Renderer::render();
 }
 
 int main() {
 	Load();
 	RenderWindow window(VideoMode(gameWidth, gameHeight), "PACMAN");
+	Renderer::initialise(window);
+	Load();
 	while (window.isOpen()) {
 		window.clear();
 		Update(window);
 		Render(window);
 		window.display();
 	}
+
+	Renderer::shutdown();
 
 	return 0;
 }
