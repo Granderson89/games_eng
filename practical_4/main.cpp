@@ -8,8 +8,7 @@ using namespace sf;
 using namespace std;
 
 const int gameWidth = 800;
-const int gameHeight = 600;
-
+const int gameHeight = 800;
 
 
 void Load() {
@@ -49,7 +48,6 @@ void Render(RenderWindow &window) {
 }
 
 int main() {
-	Load();
 	RenderWindow window(VideoMode(gameWidth, gameHeight), "PACMAN");
 	Renderer::initialise(window);
 	Load();

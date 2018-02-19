@@ -14,7 +14,7 @@ namespace sf {
 	typedef Vector2<size_t> Vector2ul;
 	// Returns the length of a sf::vector
 	template <typename T> double length(const Vector2<T> &v) {
-		return sqrt(pow(x, 2) + pow(y, 2));
+		return sqrt(pow(v.x, 2) + pow(v.y, 2));
 	}
 	// return normalized sf::vector
 	template <typename T> Vector2<T> normalize(const Vector2<T> &v) {

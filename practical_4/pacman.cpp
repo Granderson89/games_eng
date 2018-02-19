@@ -1,6 +1,9 @@
 #include "pacman.h"
 #include "ecm.h"
 #include "system_renderer.h"
+#include "actor_movement_component.h"
+#include "shape_component.h"
+#include "pickup_component.h"
 #include <LevelSystem.h>
 
 using namespace sf;
@@ -12,18 +15,80 @@ std::shared_ptr<Scene> activeScene;
 
 #define GHOSTS_COUNT 4
 
-const Keyboard::Key controls[4] = {
-	Keyboard::Left,
-	Keyboard::Right,
-	Keyboard::Up,
-	Keyboard::Down
-};
+vector<shared_ptr<Entity>> ghosts;
+shared_ptr<Entity> player;
+vector<shared_ptr<Entity>> nibbles;
+vector<shared_ptr<Entity>> npcs;
+
+
+Font font;
 
 /*
 *	GAME SCENE
 */
 
+std::shared_ptr<Entity> GameScene::makeNibble(sf::Vector2f& nl, bool big) {
+	auto cherry = make_shared<Entity>();
+	auto s = cherry->addComponent<ShapeComponent>();
+
+	// set colour
+	if (big == true) {
+		s->setShape<sf::CircleShape>(10.f);
+		s->getShape().setFillColor(Color::Blue);
+		s->getShape().setOrigin(10.f, 10.f);
+	}
+	else {
+		s->setShape<sf::CircleShape>(6.f);
+		s->getShape().setFillColor(Color::White);
+		s->getShape().setOrigin(6.f, 6.f);
+	}
+	auto ps = cherry->addComponent<PickupComponent>();
+	cherry->setPosition(nl + Vector2f(10.f, 10.f));
+
+	ps->setEntities(npcs);
+
+	return cherry;
+}
+
+void GameScene::respawn() {
+	_ents.list[0]->setPosition(ls::getTilePosition(ls::findTiles(ls::START)[0]));
+
+	auto ghost_spawns = ls::findTiles(ls::ENEMY);
+	for (int i = 1; i < _ents.list.size(); ++i) {
+		_ents.list[i]->setPosition(
+			ls::getTilePosition(ghost_spawns[rand() % ghost_spawns.size()]));
+	}
+
+	// clear any remaining nibbles
+	for (auto n : nibbles) {
+		n->setForDelete();
+		n.reset();
+	}
+	nibbles.clear();
+
+	// white nibbles
+	auto nibbleLoc = LevelSystem::findTiles(LevelSystem::EMPTY);
+	for (const auto& nl : nibbleLoc) {
+		auto loc = static_cast<Vector2f>(LevelSystem::getTilePosition(nl));
+		auto cherry = makeNibble(loc, false);
+		// add to _ents and nibbles list
+		_ents.list.push_back(cherry);
+		nibbles.push_back(cherry);
+	}
+	// blue nibbles
+	nibbleLoc = LevelSystem::findTiles(LevelSystem::WAYPOINT);
+	for (const auto& nl : nibbleLoc) {
+		auto loc = static_cast<Vector2f>(LevelSystem::getTilePosition(nl));
+		auto cherry = makeNibble(loc, true);
+		// add to _ents and nibbles list
+		_ents.list.push_back(cherry);
+		nibbles.push_back(cherry);
+	}
+}
+
 void GameScene::load() {
+	ls::loadLevelFile("res/pacman.txt", 25.0f);
+
 	{
 		auto pl = make_shared<Entity>();
 
@@ -35,6 +100,8 @@ void GameScene::load() {
 		pl->addComponent<PlayerMovementComponent>();
 
 		_ents.list.push_back(pl);
+		npcs.push_back(pl);
+		player = pl;
 	}
 
 	const sf::Color ghost_cols[]{ {208, 62, 25},	// red Blinky
@@ -51,8 +118,12 @@ void GameScene::load() {
 
 		ghost->addComponent<EnemyAIComponent>();
 
+		ghosts.push_back(ghost);
+		npcs.push_back(ghost);
 		_ents.list.push_back(ghost);
 	}
+
+	respawn();
 }
 
 void GameScene::update(double dt) {
@@ -60,14 +131,16 @@ void GameScene::update(double dt) {
 		activeScene = menuScene;
 	}
 	Scene::update(dt);
-}
 
-void GameScene::respawn() {
-
+	for (auto& g : ghosts) {
+		if (length(g->getPosition() - player->getPosition()) < 30.0f) {
+			respawn();
+		}
+	}
 }
 
 void GameScene::render() {
-	LevelSystem::render(Renderer::getWindow());
+	ls::render(Renderer::getWindow());
 	Scene::render();
 }
 
@@ -76,7 +149,11 @@ void GameScene::render() {
 */
 
 void MenuScene::load() {
-
+	font.loadFromFile("res/fonts/RobotoMono-Regular.ttf");
+	text.setFont(font);
+	text.setCharacterSize(32);
+	text.setPosition(800 * .5f, 600 * .5f);
+	text.setColor(Color::White);
 }
 
 void MenuScene::update(double dt) {
@@ -90,93 +167,4 @@ void MenuScene::update(double dt) {
 void MenuScene::render() {
 	Renderer::queue(&text);
 	Scene::render();
-}
-
-/*
-*	SHAPE COMPONENT
-*/
-
-void ShapeComponent::update(double dt) {
-	_shape->setPosition(_parent->getPosition());
-}
-
-void ShapeComponent::render() { Renderer::queue(_shape.get()); }
-
-sf::Shape& ShapeComponent::getShape() const { return *_shape; }
-
-ShapeComponent::ShapeComponent(Entity* p) 
-	: Component(p), _shape(make_shared<sf::CircleShape>()) {}
-
-/*
-*	ACTOR MOVEMENT COMPONENT
-*/
-
-void ActorMovementComponent::update(double dt) {}
-
-ActorMovementComponent::ActorMovementComponent(Entity* p)
-	: _speed(100.0f), Component(p) {}
-
-//bool ActorMovementComponent::validMove(const sf::Vector2f& pos) {
-//	return (LevelSystem::getTileAt(pos) != LevelSystem::WALL);
-//}
-
-void ActorMovementComponent::move(const sf::Vector2f& p) {
-	auto pp = _parent->getPosition() + p;
-	//if (validMove(pp)) {
-		_parent->setPosition(pp);
-	//}
-}
-
-void ActorMovementComponent::move(float x, float y) {
-	move(Vector2f(x, y));
-}
-
-float ActorMovementComponent::getSpeed() const {
-	return _speed;
-}
-
-void ActorMovementComponent::setSpeed(float speed) {
-	_speed = speed;
-}
-
-/*
-*	PLAYER MOVEMENT COMPONENT
-*/
-
-PlayerMovementComponent::PlayerMovementComponent(Entity* p)
-	: ActorMovementComponent(p) {}
-
-void PlayerMovementComponent::update(double dt) {
-	// Move in four directions based on keys
-	sf::Vector2f direction(0.0f, 0.0f);
-
-	if (Keyboard::isKeyPressed(controls[0])) {
-		direction.x = -1.0f;
-	}
-	if (Keyboard::isKeyPressed(controls[1])) {
-		direction.x = 1.0f;
-	}
-	if (Keyboard::isKeyPressed(controls[2])) {
-		direction.y = -1.0f;
-	}
-	if (Keyboard::isKeyPressed(controls[3])) {
-		direction.y = 1.0f;
-	}
-
-	move(direction);
-}
-
-/*
-*	EMENY AI COMPONENT
-*/
-
-EnemyAIComponent::EnemyAIComponent(Entity* p) 
-	: ActorMovementComponent(p) {}
-
-void EnemyAIComponent::update(double dt) {
-	// Move randomly
-	sf::Vector2f direction(0.0f, 0.0f);
-	direction.x += (float)rand() / RAND_MAX * 2.0f - 1.0f;
-	direction.y += (float)rand() / RAND_MAX * 2.0f - 1.0f;
-	move(direction * _speed * (float)dt);
 }

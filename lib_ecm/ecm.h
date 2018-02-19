@@ -40,6 +40,17 @@ public:
 		_components.push_back(sp);
 		return sp;
 	}
+
+	template<typename ComponentType>
+	ComponentType* GetComponent() {
+		for (unsigned int i = 0; i < _components.size(); ++i) {
+			if (ComponentType* cmp = dynamic_cast<ComponentType*>(_components[i].get())) {
+				return cmp;
+			}
+		}
+
+		return nullptr;
+	}
 };
 
 class Component {
