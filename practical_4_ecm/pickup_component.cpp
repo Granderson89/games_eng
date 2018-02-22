@@ -11,7 +11,7 @@ void PickupComponent::update(double dt) {
 	for (auto e : _ents) {
 		if (length(_parent->getPosition() - e->getPosition()) < 30.0f) {
 
-			auto cp = e->GetComponent<ActorMovementComponent>();
+			auto cp = e->GetCompatibleComponent<ActorMovementComponent>()[0];
 
 			if (cp != nullptr) {
 				cp->setSpeed(cp->getSpeed() + 1.0f);

@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "entity.h"
+#include "ecm.h"
 
 class Scene {
 public:
