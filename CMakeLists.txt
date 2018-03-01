@@ -113,6 +113,8 @@ file(GLOB_RECURSE SOURCES practical_7_steering/*.cpp practical_7_steering/*.h)
 file(GLOB_RECURSE CMPNTS practical_7_steering/components/*.cpp practical_7_steering/components/*.h)
 file(GLOB_RECURSE SCENES practical_7_steering/scenes/*.cpp practical_7_steering/scenes/*.h)
 add_executable(PRACTICAL_7_STEERING ${SOURCES} ${CMPNTS} ${SCENES} ${RESOURCE_FILES})
+source_group("components" FILES ${CMPNTS})
+source_group("resources" FILES ${RESOURCE_FILES})
 target_link_libraries(PRACTICAL_7_STEERING lib_engine)
 set(EXECUTABLES ${EXECUTABLES} PRACTICAL_7_STEERING)
 
