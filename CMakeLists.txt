@@ -118,6 +118,14 @@ source_group("resources" FILES ${RESOURCE_FILES})
 target_link_libraries(PRACTICAL_7_STEERING lib_engine)
 set(EXECUTABLES ${EXECUTABLES} PRACTICAL_7_STEERING)
 
+## 8 - Decisions
+file(GLOB_RECURSE SOURCES practical_8_decisions/*.cpp practical_8_decisions/*.h)
+file(GLOB_RECURSE CMPNTS practical_8_decisions/components/*.cpp practical_8_decisions/scenes/*.h)
+file(GLOB_RECURSE SCENES practical_8_decisions/scenes/*.cpp practical_8_decisions/scenes/*.h)
+add_executable(PRACTICAL_8_DECISIONS ${SOURCES} ${CMPNTS} ${SCENES} ${RESOURCE_FILES})
+target_link_libraries(PRACTICAL_8_DECISIONS lib_engine)
+set(EXECUTABLES ${EXECUTABLES} PRACTICAL_8_DECISIONS)
+
 #### Target for copying resources to build dir####
 if(APPLE)
   add_custom_target(copy_resources ALL
