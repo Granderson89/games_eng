@@ -13,6 +13,11 @@ void SeekState::execute(Entity *owner, double dt) noexcept {
 	s[0]->getShape().setFillColor(Color::Green);
 	auto output = _steering.getSteering();
 	owner->setPosition(owner->getPosition() + (output.direction * (float)dt));
+
+	if (length(owner->getPosition() - _player->getPosition()) < 100.0f) {
+		auto sm = owner->get_components<StateMachineComponent>();
+		sm[0]->changeState("flee");
+	}
 }
 
 void FleeState::execute(Entity *owner, double dt) noexcept {
@@ -20,4 +25,9 @@ void FleeState::execute(Entity *owner, double dt) noexcept {
 	s[0]->getShape().setFillColor(Color::Yellow);
 	auto output = _steering.getSteering();
 	owner->setPosition(owner->getPosition() + (output.direction * (float)dt));
+
+	if (length(owner->getPosition() - _player->getPosition()) > 100.0f) {
+		auto sm = owner->get_components<StateMachineComponent>();
+		sm[0]->changeState("seek");
+	}
 }

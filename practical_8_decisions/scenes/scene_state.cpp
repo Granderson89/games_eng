@@ -3,6 +3,7 @@
 #include "../components/cmp_sprite.h"
 #include "../components/cmp_basic_movement.h"
 #include "../components/cmp_state_machine.h"
+#include "../steering_states.h"
 #include <LevelSystem.h>
 
 using namespace std;
@@ -24,9 +25,9 @@ void StateScene::Load() {
 	s->getShape().setFillColor(Color::Blue);
 
 	auto sm = enemy->addComponent<StateMachineComponent>();
-	sm->addState("normal", make_shared<NormalState>(player));
-	sm->addState("near", make_shared<NearState>(player));
-	sm->changeState("normal");
+	sm->addState("seek", make_shared<SeekState>(enemy, player));
+	sm->addState("flee", make_shared<FleeState>(enemy, player));
+	sm->changeState("seek");
 }
 
 void StateScene::UnLoad() {
